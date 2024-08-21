@@ -9,6 +9,9 @@ target/
 # Ignore logs directory
 /logs/
 
+# Ignore classes files
+/bin/classes/
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
