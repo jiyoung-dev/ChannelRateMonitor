@@ -3,8 +3,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-# Ignore application.properties in resources folder
-/src/main/resources/application.properties
+# Ignore properties file in resources folder
+/config/database.properties
 
 # Ignore logs directory
 /logs/

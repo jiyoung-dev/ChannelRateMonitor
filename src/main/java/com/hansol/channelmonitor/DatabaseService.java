@@ -1,4 +1,4 @@
-package com.hansol.busyalert;
+package com.hansol.channelmonitor;
 
 import java.io.InputStream;
 import java.sql.Connection;
@@ -15,7 +15,7 @@ public class DatabaseService {
     private String dbPassword;
 
     public DatabaseService() {
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("database.properties")) {
             Properties prop = new Properties();
             prop.load(input);
             dbUrl = prop.getProperty("db.url");
