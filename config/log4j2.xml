@@ -2,17 +2,18 @@
 <Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
-        <RollingFile name="LogFile" fileName="logs/app.log" filePattern="logs/app-%d{yyyy-MM-dd}.log">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        <RollingFile name="LogFile" fileName="logs/channelmonitor.log"
+                     filePattern="logs/channelmonitor-%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
             <Policies>
-                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/> <!-- 매일 자정에 롤링 --> 
             </Policies>
-            <DefaultRolloverStrategy>
-                <Delete basePath="${sys:user.dir}/logs" maxDepth="2">
-                    <IfFileName glob="app-*.log" /> <!-- 이전날짜의 로그파일만 삭제 --> 
-                    <IfLastModified age="1d" /> <!-- 로그파일 삭제 및 생성주기 -->
+            <DefaultRolloverStrategy max="1" fileIndex="min">
+                <Delete basePath="logs" maxDepth="1">
+                    <IfFileName glob="channelmonitor-*.log" />
+                    <IfLastModified age="1s" /> <!-- 롤링 후 바로 삭제 -->
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
