@@ -28,45 +28,38 @@ public class DatabaseService {
         }
     }
 
-    public Map<String, Integer> getBusyRate() {
+    public Map<String, Integer> getBusyRates() {
     	  Map<String, Integer> busyRates = new HashMap<>();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         String currentDate = LocalDate.now().format(formatter);
 
-        String query = "WITH LastedBusyRate AS ( " +
+        String query = "WITH CurrentBusyRate AS ( " +
             "    SELECT " +
-            "        UniqueSystemID, " +
-            "        RecordDate, " +
-            "        RecordTime, " +
-            "        RealTotalPorts, " +
-            "        OccupiedCount, " +
-            "        SavingBorder, " +
-            "        BusyRate, " +
-            "        ChannelState, " +
-            "        ROW_NUMBER() OVER (PARTITION BY UniqueSystemID ORDER BY RecordTime DESC) AS rn " +
-            "    FROM BusyRate " +
-            "    WHERE UniqueSystemID IN ('00101001', '00101002', '00201001', '00201002') " +
-            "        AND RecordDate = ? " +
+            "        br.UniqueSystemID, " +
+            "        br.RecordDate, " +
+            "        br.RecordTime, " +
+            "        br.RealTotalPorts, " +
+            "        br.OccupiedCount, " +
+            "        br.SavingBorder, " +
+            "        br.BusyRate, " +
+            "        br.ChannelState, " +
+            "        ROW_NUMBER() OVER (PARTITION BY br.UniqueSystemID ORDER BY br.RecordTime DESC) AS rn, " +
+            "        acd.Title AS CenterName " + 
+            "    FROM BusyRate br " +
+            "    JOIN AreaCodeDirectory acd " + 
+            "    	ON br.UniqueSystemID LIKE CONCAT(acd.AreaCode, '%') " +
+            "    WHERE br.RecordDate = ? " +
             ") " +
-            "SELECT " +
-            "    CASE " +
-            "        WHEN UniqueSystemID IN ('00101001', '00101002') THEN '강남' " +
-            "        WHEN UniqueSystemID IN ('00201001', '00201002') THEN '송도' " +
-            "    END AS CenterName, " +
-            "    AVG(BusyRate) AS BusyRateAvg, " +
-            "    RecordDate, " +
-            "    RecordTime " +
-            "FROM LastedBusyRate " +
-            "WHERE rn = 2 " +  
-            "GROUP BY " +
-            "    CASE " +
-            "        WHEN UniqueSystemID IN ('00101001', '00101002') THEN '강남' " +
-            "        WHEN UniqueSystemID IN ('00201001', '00201002') THEN '송도' " +
-            "    END, " +
-            "    RecordDate, " +
-            "    RecordTime " +
-            "ORDER BY CenterName";
+            "SELECT " + 
+            "	CenterName, " + 
+            "	AVG(BusyRate) AS BusyRateAvg, " + 
+            "	RecordDate, " + 
+            "	RecordTime " + 
+            "FROM CurrentBusyRate " + 
+            "WHERE rn = 2 " + 
+            "GROUP BY CenterName, RecordDate, RecordTime " + 
+            "ORDER BY CenterName "; 
         
         try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -89,7 +82,7 @@ public class DatabaseService {
 
     public String getCodeID(String codeName) {
         String codeID = "0";
-        String query = "SELECT CodeID FROM CMCodeInfo WHERE CodeName = ?";
+        String query = "SELECT CodeName FROM CMCodeInfo WHERE CodeID = ?";
 
         try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -98,7 +91,7 @@ public class DatabaseService {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    codeID = rs.getString("CodeID");
+                    codeID = rs.getString("CodeName");
                 }
             }
         } catch (Exception e) {

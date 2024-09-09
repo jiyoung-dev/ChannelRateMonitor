@@ -22,13 +22,13 @@ public class MonitorService {
 	          getThresholds();
 	
 	          // BusyRate 조회
-	          Map<String, Integer> busyRates = dbService.getBusyRate();
+	          Map<String, Integer> busyRates = dbService.getBusyRates();
 	
 	          System.out.println("busyRates : " + busyRates);
 	
-	          // 초기화는 처음 센터가 추가될 때만 수행
+	          // 센터별 로그상태 저장 
 	          for (String center : busyRates.keySet()) {
-	              dangerLoggedMap.putIfAbsent(center, false); // 최초 설정 시에만 false로 설정
+	              dangerLoggedMap.putIfAbsent(center, false); 
 	              warningLoggedMap.putIfAbsent(center, false);
 	          }
 	
@@ -39,16 +39,15 @@ public class MonitorService {
 	              boolean dangerLogged = dangerLoggedMap.get(centerName);
 	              boolean warningLogged = warningLoggedMap.get(centerName);
 	
-	              // 위험 임계치 이상 
+	              // 위험 임계치 이상: 경고&위험 로그를 남긴다 
 	              if (currentBusyRate >= dangerThreshold) {
 	              	  if (!warningLogged) {
-	              		  // 경고 로그남김 (경고도 위험 포함임) 
 	              		  logger.info("[IVRA] {}_채널점유율: {}% 경고, 현재 채널점유율: {}%", centerName, warningThreshold, currentBusyRate);
 	              		  warningLoggedMap.put(centerName, true);
 	              	  }
 	                  if (!dangerLogged) {
 	                      logger.info("[IVRA] {}_채널점유율: {}% 위험, 현재 채널점유율: {}%", centerName, dangerThreshold, currentBusyRate);
-	                      dangerLoggedMap.put(centerName, true);  // 위험 로깅 상태 갱신
+	                      dangerLoggedMap.put(centerName, true);  
 	                  }
 	              } 
 	              // 경고 임계치 이상 & 위험 임계치 미만
@@ -84,11 +83,11 @@ public class MonitorService {
 	  }
 	
 	  private void getThresholds() {
-	      String warningThresholdStr = dbService.getCodeID("위험");
-	      String dangerThresholdStr = dbService.getCodeID("심각");
+	      String warningThresholdStr = dbService.getCodeID("경고");
+	      String dangerThresholdStr = dbService.getCodeID("위험");
 	
-	      warningThreshold = Integer.parseInt(warningThresholdStr); // 예: 70
-	      dangerThreshold = Integer.parseInt(dangerThresholdStr);  // 예: 80 
+	      warningThreshold = Integer.parseInt(warningThresholdStr); 
+	      dangerThreshold = Integer.parseInt(dangerThresholdStr);  
 	  }
 }
 
